@@ -8,6 +8,8 @@ Shows four numbers:
 - **Distance** (miles)
 - **Speed** (mph)
 
+**Rides:** tap **New Ride**, name it, and tap **End Ride** to save it. **History** lists past rides (time, miles, avg/max watts, best 60 s, avg mph, kJ) with all-time totals. Rides are stored in the browser on that device; a ride in progress survives a page reload.
+
 The bike only measures power, so speed and distance are estimated from watts with a flat-road model (rider weight is set with the ⚙︎ button).
 
 ## Use it

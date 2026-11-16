@@ -16,13 +16,18 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-user-select: none; user-select: none; }
   body { display: flex; flex-direction: column; padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); gap: 12px; }
-  header { display: flex; align-items: center; gap: 10px; }
+  header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--bad); flex: none; }
   .dot.on { background: var(--ok); }
-  #status { color: var(--muted); font-size: 15px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .info { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+  #status { color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #rideLabel { font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #rideLabel .time { color: var(--accent); font-variant-numeric: tabular-nums; }
+  #rideLabel.idle { color: var(--muted); font-weight: 600; }
   button { background: var(--tile); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
-    font-size: 16px; font-weight: 600; padding: 10px 16px; cursor: pointer; }
+    font-size: 16px; font-weight: 600; padding: 10px 16px; cursor: pointer; font-family: inherit; }
   button.primary { background: var(--accent); color: #111; border-color: var(--accent); }
+  button.danger { background: var(--bad); color: #111; border-color: var(--bad); }
   button:active { transform: scale(0.97); }
   main { flex: 1; display: grid; gap: 12px; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; min-height: 0; }
   .tile { background: var(--tile); border: 1px solid var(--line); border-radius: 18px;
@@ -31,22 +36,50 @@
   .value { font-size: clamp(56px, 17vmin, 220px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; margin: 0.08em 0; }
   .unit { color: var(--muted); font-size: clamp(14px, 2.6vmin, 26px); font-weight: 600; }
   #power .value { color: var(--accent); }
-  dialog { margin: auto; background: var(--tile); color: var(--text); border: 1px solid var(--line); border-radius: 16px; padding: 20px; width: min(360px, 90vw); }
+
+  dialog { margin: auto; background: var(--tile); color: var(--text); border: 1px solid var(--line); border-radius: 16px; padding: 20px; width: min(380px, 90vw); }
   dialog::backdrop { background: rgba(0,0,0,0.6); }
-  dialog h2 { font-size: 18px; margin-bottom: 12px; }
+  dialog h2 { font-size: 19px; margin-bottom: 12px; }
   dialog label { display: block; color: var(--muted); font-size: 14px; margin: 12px 0 6px; }
-  dialog input { width: 100%; font-size: 18px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  dialog input { width: 100%; font-size: 18px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-family: inherit; -webkit-user-select: text; user-select: text; }
   dialog p { color: var(--muted); font-size: 13px; margin-top: 10px; line-height: 1.4; }
   dialog .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
   #unsupported { display: none; background: #3a1a1a; border: 1px solid var(--bad); border-radius: 12px; padding: 12px; font-size: 14px; line-height: 1.4; }
+
+  /* ---- History screen ---- */
+  #history { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); gap: 12px; z-index: 10; }
+  #history.open { display: flex; }
+  #history header h1 { flex: 1; font-size: 22px; }
+  .totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .total { background: var(--tile); border: 1px solid var(--line); border-radius: 14px; padding: 12px; text-align: center; }
+  .total b { display: block; font-size: clamp(22px, 4vmin, 36px); font-variant-numeric: tabular-nums; }
+  .total span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+  #rideList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
+  .ride { background: var(--tile); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .ride.fresh { border-color: var(--accent); }
+  .ride-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+  .ride-name { font-size: 18px; font-weight: 700; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ride-date { color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .ride-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; }
+  .stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+  .ride-foot { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .ride-foot button { font-size: 13px; padding: 6px 12px; }
+  .empty { color: var(--muted); text-align: center; margin-top: 40px; line-height: 1.5; }
+  @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
 <body>
   <header>
     <div class="dot" id="dot"></div>
-    <div id="status">Not connected</div>
+    <div class="info">
+      <div id="rideLabel" class="idle">Free ride, not saved</div>
+      <div id="status">Not connected</div>
+    </div>
+    <button id="historyBtn">History</button>
     <button id="settingsBtn" aria-label="Settings">⚙︎</button>
-    <button id="resetBtn">Reset</button>
+    <button id="rideBtn">New Ride</button>
     <button id="connectBtn" class="primary">Connect</button>
   </header>
 
@@ -78,11 +111,53 @@
     </section>
   </main>
 
+  <!-- History screen -->
+  <section id="history" aria-label="Past rides">
+    <header>
+      <h1>Past Rides</h1>
+      <button id="closeHistory" class="primary">Done</button>
+    </header>
+    <div class="totals">
+      <div class="total"><b id="totRides">0</b><span>Rides</span></div>
+      <div class="total"><b id="totMiles">0.0</b><span>Miles</span></div>
+      <div class="total"><b id="totTime">0:00</b><span>Time</span></div>
+      <div class="total"><b id="totAvg">--</b><span>Avg Watts</span></div>
+    </div>
+    <div id="rideList"></div>
+  </section>
+
+  <!-- New ride -->
+  <dialog id="newRide">
+    <h2>New Ride</h2>
+    <form id="newRideForm">
+      <label for="rideName">Name this ride</label>
+      <input id="rideName" type="text" maxlength="60" autocomplete="off" enterkeyhint="go">
+      <p>Distance and averages reset to zero. Tap <b>End Ride</b> when you're done to save it to History.</p>
+      <div class="row">
+        <button type="button" id="cancelRide">Cancel</button>
+        <button type="submit" class="primary">Start</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- End ride -->
+  <dialog id="endRide">
+    <h2>End this ride?</h2>
+    <p id="endSummary"></p>
+    <div class="row">
+      <button id="keepRiding">Keep riding</button>
+      <button id="discardRide" class="danger">Discard</button>
+      <button id="saveRide" class="primary">Save</button>
+    </div>
+  </dialog>
+
+  <!-- Settings -->
   <dialog id="settings">
     <h2>Settings</h2>
     <label for="weightIn">Your weight (lb)</label>
     <input id="weightIn" type="number" inputmode="decimal" min="60" max="400" step="1">
     <p>The bike only measures power, so speed is estimated from your watts the way Zwift does it: a rider of your weight on a road bike on flat ground. Heavier riders go a bit slower on the same watts.</p>
+    <p>Rides are saved in this browser on this device.</p>
     <div class="row">
       <button id="cancelSet">Cancel</button>
       <button id="saveSet" class="primary">Save</button>
@@ -102,50 +177,74 @@
   const TICK_MS = 250;                  // update loop
   const WINDOW_MS = 60000;              // rolling-average window
   const STALE_MS = 3000;                // no data this long → treat power as 0
+  const AUTOSAVE_MS = 5000;             // how often an in-progress ride is saved
 
   const $ = id => document.getElementById(id);
   const ui = {
-    dot: $('dot'), status: $('status'), connect: $('connectBtn'), reset: $('resetBtn'),
+    dot: $('dot'), status: $('status'), rideLabel: $('rideLabel'),
+    connect: $('connectBtn'), rideBtn: $('rideBtn'),
     power: $('powerVal'), avg: $('avgVal'), dist: $('distVal'), speed: $('speedVal'),
-    settings: $('settings'), settingsBtn: $('settingsBtn'), weightIn: $('weightIn'),
+    settings: $('settings'), weightIn: $('weightIn'),
+    newRide: $('newRide'), rideName: $('rideName'),
+    endRide: $('endRide'), endSummary: $('endSummary'),
+    history: $('history'), rideList: $('rideList'),
   };
 
-  // ---- Persistent setting (rider weight) ----
+  // ---- Storage (this browser only) ----
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
   };
   let riderLb = store.get('riderLb', 185);
+  let rides = store.get('rides', []);   // finished rides, oldest first
 
-  // ---- State ----
+  // ---- Live state ----
   let device = null, wantConnected = false;
   let lastPower = 0, lastPacketAt = 0;
   let distanceM = 0, speedMps = 0;
   let samples = [];                     // {t, p} one per tick
-  let lastTick = performance.now();
+  let lastTick = performance.now(), lastAutosave = 0;
+
+  // ---- Current ride (null = free ride, nothing saved) ----
+  let ride = store.get('activeRide', null);  // resumes a ride if the page was reloaded mid-ride
+  if (ride) distanceM = ride.distanceM || 0;
+
+  function newRideObj(name) {
+    return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name,
+      start: Date.now(), elapsedS: 0, distanceM: 0, energyJ: 0, maxW: 0, best60W: 0 };
+  }
 
   // ---- Physics: solve P = (Crr*m*g + 0.5*rho*CdA*v^2) * v for v (Newton's method) ----
   function speedFromPower(p) {
     if (p <= 0) return 0;
     const m = riderLb * 0.45359237 + BIKE_KG;
     const a = 0.5 * RHO * CDA, b = CRR * m * G;
-    let v = Math.cbrt(p / a);            // good starting guess
+    let v = Math.cbrt(p / a);
     for (let i = 0; i < 20; i++) {
       const f = a * v * v * v + b * v - p;
-      const df = 3 * a * v * v + b;
-      const nv = v - f / df;
+      const nv = v - f / (3 * a * v * v + b);
       if (Math.abs(nv - v) < 1e-6) { v = nv; break; }
       v = nv;
     }
     return Math.max(0, v);
   }
 
-  // ---- Parse Cycling Power Measurement: flags (uint16) then instantaneous power (sint16, watts) ----
+  // ---- Formatting ----
+  const fmtTime = s => {
+    s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+    return h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`;
+  };
+  const fmtDate = ms => new Date(ms).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const miles = m => m / M_PER_MILE;
+  const rideAvgW = r => r.elapsedS > 0 ? r.energyJ / r.elapsedS : 0;
+  const rideAvgMph = r => r.elapsedS > 0 ? miles(r.distanceM) / (r.elapsedS / 3600) : 0;
+
+  // ---- Bluetooth ----
   function onMeasurement(event) {
     const dv = event.target.value;
     if (dv.byteLength < 4) return;
-    const watts = dv.getInt16(2, true);
-    lastPower = Math.max(0, watts);
+    lastPower = Math.max(0, dv.getInt16(2, true));   // flags (uint16), then instantaneous power (sint16 W)
     lastPacketAt = performance.now();
   }
 
@@ -189,7 +288,6 @@
   async function onDisconnected() {
     lastPower = 0;
     if (!wantConnected) return;
-    // Auto-reconnect with backoff (meter may have dozed off or dropped)
     for (let attempt = 1; attempt <= 10 && wantConnected; attempt++) {
       setStatus('Connection lost. Reconnecting (' + attempt + ')…', false);
       try { await connectGatt(); return; } catch { await new Promise(r => setTimeout(r, Math.min(1000 * attempt, 5000))); }
@@ -202,9 +300,120 @@
   async function requestWakeLock() {
     try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch {}
   }
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && wantConnected) requestWakeLock(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && (wantConnected || ride)) requestWakeLock(); });
 
-  // ---- Main loop: integrate distance, maintain 60 s average, render ----
+  // ---- Rides ----
+  function resetLive() { distanceM = 0; samples = []; }
+
+  function startRide(name) {
+    ride = newRideObj(name);
+    resetLive();
+    store.set('activeRide', ride);
+    renderRideUI();
+    requestWakeLock();
+  }
+
+  function finishRide(save) {
+    if (!ride) return;
+    if (save) {
+      ride.distanceM = distanceM;
+      rides.push(ride);
+      store.set('rides', rides);
+    }
+    const savedId = save ? ride.id : null;
+    ride = null;
+    store.del('activeRide');
+    resetLive();
+    renderRideUI();
+    if (savedId) openHistory(savedId);
+  }
+
+  function renderRideUI() {
+    if (ride) {
+      ui.rideBtn.textContent = 'End Ride';
+      ui.rideBtn.classList.add('danger');
+      ui.rideLabel.classList.remove('idle');
+    } else {
+      ui.rideBtn.textContent = 'New Ride';
+      ui.rideBtn.classList.remove('danger');
+      ui.rideLabel.classList.add('idle');
+      ui.rideLabel.textContent = 'Free ride, not saved';
+    }
+  }
+
+  function renderRideLabel() {
+    if (!ride) return;
+    ui.rideLabel.textContent = '';
+    ui.rideLabel.append(ride.name + ' · ');
+    const t = document.createElement('span'); t.className = 'time'; t.textContent = fmtTime(ride.elapsedS);
+    ui.rideLabel.append(t);
+  }
+
+  // ---- History screen ----
+  function statEl(value, label) {
+    const d = document.createElement('div'); d.className = 'stat';
+    const b = document.createElement('b'); b.textContent = value;
+    const s = document.createElement('span'); s.textContent = label;
+    d.append(b, s); return d;
+  }
+
+  function openHistory(highlightId) {
+    // Totals
+    const totS = rides.reduce((a, r) => a + r.elapsedS, 0);
+    const totJ = rides.reduce((a, r) => a + r.energyJ, 0);
+    $('totRides').textContent = rides.length;
+    $('totMiles').textContent = miles(rides.reduce((a, r) => a + r.distanceM, 0)).toFixed(1);
+    $('totTime').textContent = fmtTime(totS);
+    $('totAvg').textContent = totS > 0 ? Math.round(totJ / totS) : '--';
+
+    // List, newest first
+    ui.rideList.textContent = '';
+    if (!rides.length) {
+      const e = document.createElement('div'); e.className = 'empty';
+      e.textContent = 'No saved rides yet. Tap New Ride, give it a name, and End Ride when you finish.';
+      ui.rideList.append(e);
+    }
+    [...rides].reverse().forEach(r => {
+      const card = document.createElement('article');
+      card.className = 'ride' + (r.id === highlightId ? ' fresh' : '');
+
+      const head = document.createElement('div'); head.className = 'ride-head';
+      const name = document.createElement('div'); name.className = 'ride-name'; name.textContent = r.name;
+      const date = document.createElement('div'); date.className = 'ride-date'; date.textContent = fmtDate(r.start);
+      head.append(name, date);
+
+      const stats = document.createElement('div'); stats.className = 'ride-stats';
+      stats.append(
+        statEl(fmtTime(r.elapsedS), 'Time'),
+        statEl(miles(r.distanceM).toFixed(2), 'Miles'),
+        statEl(Math.round(rideAvgW(r)), 'Avg W'),
+        statEl(Math.round(r.maxW), 'Max W'),
+        statEl(r.best60W ? Math.round(r.best60W) : '--', 'Best 60s'),
+        statEl(rideAvgMph(r).toFixed(1), 'Avg mph'),
+        statEl(Math.round(r.energyJ / 1000), 'kJ'),
+      );
+
+      const foot = document.createElement('div'); foot.className = 'ride-foot';
+      const del = document.createElement('button'); del.textContent = 'Delete';
+      let armed = false;
+      del.addEventListener('click', () => {
+        if (!armed) { armed = true; del.textContent = 'Tap again to delete'; del.classList.add('danger');
+          setTimeout(() => { armed = false; del.textContent = 'Delete'; del.classList.remove('danger'); }, 3000); return; }
+        rides = rides.filter(x => x.id !== r.id);
+        store.set('rides', rides);
+        openHistory();
+      });
+      foot.append(del);
+
+      card.append(head, stats, foot);
+      ui.rideList.append(card);
+    });
+
+    ui.history.classList.add('open');
+    ui.rideList.scrollTop = 0;
+  }
+
+  // ---- Main loop ----
   function tick() {
     const now = performance.now();
     const dt = Math.min((now - lastTick) / 1000, 1);   // cap so a backgrounded tab doesn't add a big jump
@@ -220,19 +429,60 @@
       samples.push({ t: now, p });
       while (samples.length && now - samples[0].t > WINDOW_MS) samples.shift();
     }
+    const avg60 = samples.length ? samples.reduce((s, x) => s + x.p, 0) / samples.length : null;
+
+    if (ride) {
+      ride.elapsedS += dt;
+      ride.energyJ += p * dt;
+      ride.distanceM = distanceM;
+      if (p > ride.maxW) ride.maxW = p;
+      // Best 60 s only counts once a full minute of data is in the window
+      if (avg60 !== null && samples.length && now - samples[0].t >= WINDOW_MS - TICK_MS * 2 && avg60 > ride.best60W) ride.best60W = avg60;
+      renderRideLabel();
+      if (now - lastAutosave > AUTOSAVE_MS) { store.set('activeRide', ride); lastAutosave = now; }
+    }
 
     ui.power.textContent = live ? Math.round(p) : '--';
-    ui.avg.textContent = samples.length ? Math.round(samples.reduce((s, x) => s + x.p, 0) / samples.length) : '--';
-    ui.dist.textContent = (distanceM / M_PER_MILE).toFixed(2);
+    ui.avg.textContent = avg60 === null ? '--' : Math.round(avg60);
+    ui.dist.textContent = miles(distanceM).toFixed(2);
     ui.speed.textContent = (speedMps * MPS_TO_MPH).toFixed(1);
   }
   setInterval(tick, TICK_MS);
+  window.addEventListener('pagehide', () => { if (ride) store.set('activeRide', ride); });
 
   // ---- Buttons ----
   ui.connect.addEventListener('click', () => (device && device.gatt.connected) || wantConnected ? disconnect() : connect());
-  ui.reset.addEventListener('click', () => { distanceM = 0; samples = []; });
 
-  ui.settingsBtn.addEventListener('click', () => { ui.weightIn.value = riderLb; ui.settings.showModal(); });
+  ui.rideBtn.addEventListener('click', () => {
+    if (ride) {
+      ui.endSummary.textContent = `${ride.name}: ${fmtTime(ride.elapsedS)}, ${miles(distanceM).toFixed(2)} mi, ${Math.round(rideAvgW(ride))} W average.`;
+      ui.endRide.showModal();
+    } else {
+      ui.rideName.value = 'Ride · ' + new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      ui.newRide.showModal();
+      setTimeout(() => { ui.rideName.focus(); ui.rideName.select(); }, 50);
+    }
+  });
+  $('newRideForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = ui.rideName.value.trim() || 'Ride';
+    ui.newRide.close();
+    startRide(name);
+  });
+  $('cancelRide').addEventListener('click', () => ui.newRide.close());
+  $('keepRiding').addEventListener('click', () => ui.endRide.close());
+  $('saveRide').addEventListener('click', () => { ui.endRide.close(); finishRide(true); });
+  let discardArmed = false;
+  $('discardRide').addEventListener('click', e => {
+    if (!discardArmed) { discardArmed = true; e.target.textContent = 'Tap again'; setTimeout(() => { discardArmed = false; e.target.textContent = 'Discard'; }, 3000); return; }
+    discardArmed = false; e.target.textContent = 'Discard';
+    ui.endRide.close(); finishRide(false);
+  });
+
+  $('historyBtn').addEventListener('click', () => openHistory());
+  $('closeHistory').addEventListener('click', () => ui.history.classList.remove('open'));
+
+  $('settingsBtn').addEventListener('click', () => { ui.weightIn.value = riderLb; ui.settings.showModal(); });
   $('cancelSet').addEventListener('click', () => ui.settings.close());
   $('saveSet').addEventListener('click', () => {
     const v = parseFloat(ui.weightIn.value);
@@ -240,6 +490,8 @@
     ui.settings.close();
   });
 
+  renderRideUI();
+  if (ride) { renderRideLabel(); setStatus('Resumed “' + ride.name + '”. Tap Connect.', false); }
   if (!navigator.bluetooth) $('unsupported').style.display = 'block';
 })();
 </script>
